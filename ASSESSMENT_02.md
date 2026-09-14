@@ -32,16 +32,15 @@
 
 ## Task B — Architecture (MVP mở rộng)
 
-```
-Frontend (Next.js/React)
-   ↓
-Backend/API (tách API riêng dùng Python - FastApi, ...)
-   ↓
-Application Logic (assessment service, check-in service, action service)
-   ↓
-AI Layer (prompt orchestration, có thể cần agent cho 1 luồng cụ thể)
-   ↓
-Data / Storage (Postgres + reids)
+```mermaid
+flowchart TD
+    FE["Frontend (Next.js/React)"]
+    BE["Backend/API<br/>(tách riêng, dùng Python FastAPI...)"]
+    AL["Application Logic<br/>(assessment service, check-in service, action service)"]
+    AI["AI Layer<br/>(prompt orchestration, agent cho 1 luồng cụ thể)"]
+    DATA["Data / Storage<br/>(Postgres + Redis)"]
+
+    FE --> BE --> AL --> AI --> DATA
 ```
 
 ### 1. Frontend

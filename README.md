@@ -1,7 +1,6 @@
 # Student Development Assistant (SGOS Assessment 01)
 
-Mini AI-powered Student Development Assistant. Làm cho SGOS Product
-Engineer Assessment, Test 1 (Product & AI Prototype).
+Mini AI-powered Student Development Assistant.
 
 ## 1. Product overview
 
@@ -49,26 +48,30 @@ evaluation" và history list; main panel chỉ hiện đúng 1 view tại 1 th�
 
 ## 5. Architecture
 
-```
-Browser (single-flow: form -> result -> history)
-   │ POST /api/evaluate { learningGoal, currentActivities, strengths, challenges, shortTermGoal }
-   ▼
-Next.js API route (src/app/api/evaluate/route.ts)
-   │ 1. parse + Zod-validate input, invalid thì trả 400
-   │ 2. load active PromptVersion từ DB (tự seed v1 nếu bảng trống)
-   │ 3. gọi AI provider (src/lib/ai.ts)
-   │ 4. parse + Zod-validate response JSON từ AI
-   │ 5. lưu Evaluation (input + output + promptVersionId)
-   │ 6. lưu RequestLog (status/latency/error), luôn ghi dù thành công hay fail
-   ▼
-Custom OpenAI-compatible endpoint (api.commandcode.ai/provider/v1)
-   │ retry 1 lần nếu network/HTTP fail, vẫn fail thì trả 502
-   │ response sai JSON/shape thì trả 422
-   ▼
-Frontend render 4 section, hoặc error message rõ ràng
+```mermaid
+flowchart TD
+    Browser["Browser<br/>single-flow: form → result → history"]
+    Validate["Zod validate input"]
+    Prompt["Load active PromptVersion từ DB<br/>(tự seed v1 nếu bảng trống)"]
+    AI["AI provider<br/>api.commandcode.ai/provider/v1"]
+    ValidateOut["Zod validate response JSON từ AI"]
+    SaveEval["Lưu Evaluation<br/>(input + output + promptVersionId)"]
+    SaveLog["Lưu RequestLog<br/>(status/latency/error, luôn ghi)"]
+    Frontend["Frontend render 4 section,<br/>hoặc error message"]
 
-GET /api/evaluations       -> history list
-GET /api/evaluations/:id   -> input + output đầy đủ 1 evaluation
+    Browser -->|"POST /api/evaluate"| Validate
+    Validate -->|invalid| E400["400"]
+    Validate -->|valid| Prompt --> AI
+    AI -->|"retry 1 lần, vẫn fail"| E502["502"]
+    AI -->|ok| ValidateOut
+    ValidateOut -->|invalid| E422["422"]
+    ValidateOut -->|valid| SaveEval --> SaveLog --> Frontend
+    E400 --> Frontend
+    E502 --> Frontend
+    E422 --> Frontend
+
+    Browser -.->|"GET /api/evaluations"| History["history list"]
+    Browser -.->|"GET /api/evaluations/:id"| Detail["input + output đầy đủ 1 evaluation"]
 ```
 
 Postgres qua Prisma lưu `PromptVersion`, `Evaluation`, `RequestLog` (xem
@@ -99,17 +102,17 @@ service, chạy chung qua Docker Compose.
 - **shadcn/ui `Sidebar`:** cần 1 chỗ điều hướng luôn hiển thị (kiểu chat
   session), chuyển giữa "new evaluation" và entry cũ không được cuộn
   trang. Base UI thay vì Radix (đổi sau khi build xong, qua `shadcn init
-  -b base -f --reinstall`, đã sweep code theo checklist prop đổi giữa 2
+-b base -f --reinstall`, đã sweep code theo checklist prop đổi giữa 2
   thư viện, không call site nào cần sửa).
 
 ## 7. Xử lý lỗi
 
-| Case | Xử lý | Vì sao |
-|---|---|---|
-| Input rỗng/invalid | 400, chặn cả frontend lẫn backend | Fail sớm, tiết kiệm 1 lượt gọi AI tốn tiền và thời gian |
-| AI API lỗi (network/5xx) | Retry 1 lần, vẫn fail trả 502 | Lỗi tạm thời đáng thử lại, không retry vô hạn |
-| AI trả sai schema | Không retry, trả 422 luôn | Lỗi prompt/parsing, retry vô ích |
-| Lỗi không lường trước | try/catch bọc ngoài, trả 500 generic | Không lộ lỗi kỹ thuật thô ra UI |
+| Case                     | Xử lý                                | Vì sao                                                  |
+| ------------------------ | ------------------------------------ | ------------------------------------------------------- |
+| Input rỗng/invalid       | 400, chặn cả frontend lẫn backend    | Fail sớm, tiết kiệm 1 lượt gọi AI tốn tiền và thời gian |
+| AI API lỗi (network/5xx) | Retry 1 lần, vẫn fail trả 502        | Lỗi tạm thời đáng thử lại, không retry vô hạn           |
+| AI trả sai schema        | Không retry, trả 422 luôn            | Lỗi prompt/parsing, retry vô ích                        |
+| Lỗi không lường trước    | try/catch bọc ngoài, trả 500 generic | Không lộ lỗi kỹ thuật thô ra UI                         |
 
 ## 8. Success criteria
 
@@ -125,7 +128,7 @@ service gặp sự cố.
   `prisma studio`).
 - Chưa có eval set tự động cho prompt regression.
 - Độ tin cậy AI phụ thuộc endpoint có tuân thủ `response_format:
-  json_object` không; nếu không, Zod vẫn reject đúng nhưng user chỉ thấy
+json_object` không; nếu không, Zod vẫn reject đúng nhưng user chỉ thấy
   message retry chung chung.
 
 ## 10. Future improvements
@@ -185,10 +188,10 @@ npm run db:seed              # seed prompt v1 thủ công (cũng tự seed ở r
 
 ## 12. Environment variables
 
-| Variable | Bắt buộc | Mô tả |
-|---|---|---|
-| `AI_API_BASE_URL` | Có | Base URL endpoint OpenAI-compatible |
-| `AI_API_KEY` | Có | API key cho endpoint trên |
-| `AI_MODEL` | Không | Tên model gọi tới (mặc định: `gpt-4o-mini`) |
-| `DATABASE_URL` | Có | Connection string Postgres (Prisma) |
+| Variable                                              | Bắt buộc    | Mô tả                                           |
+| ----------------------------------------------------- | ----------- | ----------------------------------------------- |
+| `AI_API_BASE_URL`                                     | Có          | Base URL endpoint OpenAI-compatible             |
+| `AI_API_KEY`                                          | Có          | API key cho endpoint trên                       |
+| `AI_MODEL`                                            | Không       | Tên model gọi tới (mặc định: `gpt-4o-mini`)     |
+| `DATABASE_URL`                                        | Có          | Connection string Postgres (Prisma)             |
 | `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` | Có (Docker) | `docker-compose.yml` dùng cấu hình service `db` |
