@@ -33,22 +33,32 @@ async function callOnce(systemPrompt: string, input: AssessmentInput): Promise<s
     throw new AiConfigError("AI provider is not configured (missing AI_API_BASE_URL or AI_API_KEY)");
   }
 
-  const res = await fetch(`${baseUrl.replace(/\/$/, "")}/chat/completions`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model,
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: buildUserPrompt(input) },
-      ],
-      response_format: { type: "json_object" },
-      temperature: 0.4,
-    }),
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${baseUrl.replace(/\/$/, "")}/chat/completions`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model,
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: buildUserPrompt(input) },
+        ],
+        response_format: { type: "json_object" },
+        temperature: 0.4,
+      }),
+      // without this, an unreachable/hanging AI provider (network egress
+      // blocked, DNS failure) leaves fetch pending forever: no error, no
+      // log, "Analyzing..." stuck on the frontend with nothing to debug.
+      signal: AbortSignal.timeout(30_000),
+    });
+  } catch (err) {
+    const reason = err instanceof Error ? err.message : String(err);
+    throw new AiProviderError(`AI provider request failed: ${reason}`);
+  }
 
   if (!res.ok) {
     throw new AiProviderError(`AI provider responded with status ${res.status}`);
