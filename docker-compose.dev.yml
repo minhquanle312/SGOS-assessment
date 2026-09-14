@@ -1,0 +1,28 @@
+# Dev-mode override: runs `next dev` inside the container with the source
+# mounted from the host, so edits on the host hot-reload in the container.
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+#
+# First run (or after schema changes) still needs migrations applied once:
+#   npm run db:migrate   (from the host, against localhost:5432)
+services:
+  app:
+    build: !reset null
+    image: node:26-alpine
+    working_dir: /app
+    command: sh -c "npm install && npx prisma generate && npx next dev --webpack"
+    volumes:
+      - .:/app
+      - app_node_modules:/app/node_modules
+      - app_next:/app/.next
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-sgos}:${POSTGRES_PASSWORD:-sgos_dev_password}@db:5432/${POSTGRES_DB:-sgos_assessment}?schema=public
+      AI_API_BASE_URL: ${AI_API_BASE_URL}
+      AI_API_KEY: ${AI_API_KEY}
+      AI_MODEL: ${AI_MODEL}
+      WATCHPACK_POLLING: "true"
+
+volumes:
+  app_node_modules:
+  app_next:

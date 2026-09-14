@@ -130,13 +130,32 @@ Postgres service, both run together via Docker Compose.
 
 ## 8. Setup instructions
 
-### Option A — Docker Compose (app + Postgres together)
+### Option A — Docker Compose (app + Postgres together, production build)
 
 ```bash
 cp .env.example .env   # fill in AI_API_KEY
 npm run docker:up      # builds the app image, starts app + db
 # → http://localhost:3000
 ```
+
+No hot reload — this runs the production build (`npm run build` baked
+into the image). Rebuild (`npm run docker:up` again) to pick up code
+changes.
+
+### Option A-dev — Docker Compose with hot reload
+
+```bash
+cp .env.example .env   # fill in AI_API_KEY
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+# → http://localhost:3000, edits under src/ hot-reload
+```
+
+Runs `next dev --webpack` inside the container with the source bind-mounted
+and polling enabled (`next.config.ts`'s `webpack.watchOptions.poll`) —
+Docker's bind mount doesn't reliably propagate inotify events on macOS, so
+polling is what actually makes file edits on the host trigger a rebuild.
+First run (or after a schema change) still needs migrations applied once
+from the host: `npm run db:migrate`.
 
 ### Option B — local dev, Postgres in Docker
 
