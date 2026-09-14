@@ -70,12 +70,12 @@ const AppSidebar = forwardRef<
           <span className="group-data-[collapsible=icon]:hidden">SGOS Assistant</span>
         </div>
         <Button onClick={onNewEvaluation} className="w-full justify-start gap-2">
-          <PlusIcon className="size-4" />
+          <PlusIcon data-icon="inline-start" />
           <span className="group-data-[collapsible=icon]:hidden">New evaluation</span>
         </Button>
       </SidebarHeader>
       <SidebarContent>
-        <SidebarGroup>
+        <SidebarGroup className="group-data-[collapsible=icon]:hidden">
           <SidebarGroupLabel>History</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>

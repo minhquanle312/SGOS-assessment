@@ -6,7 +6,6 @@ import EvaluationResult from "@/components/EvaluationResult";
 import AppSidebar, { type AppSidebarHandle } from "@/components/AppSidebar";
 import ThemeToggle from "@/components/ThemeToggle";
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
-import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import type { EvaluationRecord } from "@/lib/types";
 
@@ -37,9 +36,8 @@ export default function Home() {
     <SidebarProvider>
       <AppSidebar ref={sidebarRef} selectedId={current?.id ?? null} onSelect={handleSelectPast} onNewEvaluation={handleNewEvaluation} />
       <SidebarInset>
-        <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
+        <header className="flex h-14 shrink-0 items-center gap-3 border-b px-4">
           <SidebarTrigger />
-          <Separator orientation="vertical" className="mr-1 h-4" />
           <h1 className="text-sm font-semibold">Student Development Assistant</h1>
           <div className="ml-auto">
             <ThemeToggle />

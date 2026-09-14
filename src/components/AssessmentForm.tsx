@@ -112,14 +112,16 @@ export default function AssessmentForm({
             placeholder={field.placeholder}
             value={form[field.key]}
             onChange={(e) => setForm((prev) => ({ ...prev, [field.key]: e.target.value }))}
-            className="w-full resize-none rounded-md border border-input bg-transparent px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-ring"
+            className="w-full resize-none rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground transition-colors outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-input/50 disabled:opacity-50 dark:bg-input/30 dark:disabled:bg-input/80"
           />
         </div>
       ))}
 
-      <Button type="submit" disabled={status === "loading"} className="mt-2 w-fit">
-        {status === "loading" ? "Analyzing..." : "Get my assessment"}
-      </Button>
+      <div className="mt-1 flex justify-end">
+        <Button type="submit" disabled={status === "loading"}>
+          {status === "loading" ? "Analyzing..." : "Get my assessment"}
+        </Button>
+      </div>
 
       {status === "error" && errorMessage && (
         <p role="alert" className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
