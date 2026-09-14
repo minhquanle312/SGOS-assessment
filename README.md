@@ -27,17 +27,23 @@ but no built-in feedback loop.
 
 ## 4. User flow
 
-1. User lands on the page, sees a 5-field form.
+Chat-app style layout: a sidebar (shadcn/ui `Sidebar`) on the left holds
+"New evaluation" and the history list; the main panel shows exactly one
+view at a time — never both stacked, so switching views never requires
+scrolling.
+
+1. User lands on the page — main panel shows the 5-field form.
 2. Fills in: learning goal, current activities, strengths, challenges,
    short-term goal.
 3. Submits → button shows "Analyzing...".
-4. On success: result appears in place, below the form (single flow, not a
-   split form/result layout).
+4. On success: main panel switches to the result view; the sidebar's
+   history list refreshes with the new entry (active/highlighted).
 5. On failure (invalid input, AI error): an inline error message explains
    what went wrong; form state is preserved so the user can retry.
-6. A "History" list below shows past evaluations (learning goal + date).
-   Clicking one loads a read-only view showing both the original input and
-   the AI output it produced.
+6. Clicking a past entry in the sidebar switches the main panel to a
+   read-only view of that evaluation (original input + the AI output it
+   produced). A "New evaluation" button (sidebar top, and repeated in the
+   result header) returns to the form instantly from any view.
 
 ## 5. Architecture
 
@@ -93,6 +99,10 @@ Postgres service, both run together via Docker Compose.
   retrying it just wastes a call.
 - **No auth** — evaluation history is global (not per-user) in this
   prototype; out of scope, called out explicitly rather than faked.
+- **shadcn/ui `Sidebar` for navigation**: the history list needed a
+  persistent, always-reachable nav (chat-session style) rather than a list
+  stacked below the form — switching between "new evaluation" and any past
+  entry had to never require scrolling.
 
 ## 7. AI workflow
 

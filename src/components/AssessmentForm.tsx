@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { Button } from "@/components/ui/button";
 import type { EvaluationRecord } from "@/lib/types";
 
 type FieldKey =
@@ -102,7 +103,7 @@ export default function AssessmentForm({
     <form onSubmit={handleSubmit} className="flex w-full flex-col gap-5" noValidate>
       {FIELDS.map((field) => (
         <div key={field.key} className="flex flex-col gap-1.5">
-          <label htmlFor={field.key} className="text-sm font-medium text-zinc-800 dark:text-zinc-200">
+          <label htmlFor={field.key} className="text-sm font-medium text-foreground">
             {field.label}
           </label>
           <textarea
@@ -111,21 +112,17 @@ export default function AssessmentForm({
             placeholder={field.placeholder}
             value={form[field.key]}
             onChange={(e) => setForm((prev) => ({ ...prev, [field.key]: e.target.value }))}
-            className="w-full resize-none rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+            className="w-full resize-none rounded-md border border-input bg-transparent px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-ring"
           />
         </div>
       ))}
 
-      <button
-        type="submit"
-        disabled={status === "loading"}
-        className="mt-2 rounded-md bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
-      >
+      <Button type="submit" disabled={status === "loading"} className="mt-2 w-fit">
         {status === "loading" ? "Analyzing..." : "Get my assessment"}
-      </button>
+      </Button>
 
       {status === "error" && errorMessage && (
-        <p role="alert" className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">
+        <p role="alert" className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {errorMessage}
         </p>
       )}
