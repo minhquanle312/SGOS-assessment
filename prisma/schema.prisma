@@ -23,6 +23,7 @@ model PromptVersion {
   evaluations Evaluation[]
 
   @@unique([name, version])
+  @@map("prompt_versions")
 }
 
 model Evaluation {
@@ -33,6 +34,8 @@ model Evaluation {
   promptVersion   PromptVersion @relation(fields: [promptVersionId], references: [id])
   createdAt       DateTime      @default(now())
   logs            RequestLog[]
+
+  @@map("evaluations")
 }
 
 model RequestLog {
@@ -43,4 +46,6 @@ model RequestLog {
   latencyMs    Int
   errorMessage String?
   createdAt    DateTime    @default(now())
+
+  @@map("request_logs")
 }
