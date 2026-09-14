@@ -60,7 +60,7 @@ export default function Home() {
             <div className="flex flex-col gap-4">
               <div className="flex items-center justify-between">
                 <h2 className="text-sm font-semibold text-muted-foreground">
-                  {mode === "history" ? "Past evaluation" : "Your assessment"}
+                  {mode === "history" ? "Past evaluation" : "Your plan"}
                 </h2>
                 <Button variant="outline" size="sm" onClick={handleNewEvaluation}>
                   New evaluation

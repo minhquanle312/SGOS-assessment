@@ -119,7 +119,7 @@ export default function AssessmentForm({
 
       <div className="mt-1 flex justify-end">
         <Button type="submit" disabled={status === "loading"}>
-          {status === "loading" ? "Analyzing..." : "Get my assessment"}
+          {status === "loading" ? "Analyzing..." : "Get my plan"}
         </Button>
       </div>
 
