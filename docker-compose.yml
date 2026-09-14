@@ -33,28 +33,45 @@ services:
       AI_API_BASE_URL: ${AI_API_BASE_URL}
       AI_API_KEY: ${AI_API_KEY}
       AI_MODEL: ${AI_MODEL}
+      # Next.js standalone server binds to $HOSTNAME if set; Docker auto-sets
+      # HOSTNAME to the container id, which makes the server listen only on
+      # the container's own interface IP, not on 127.0.0.1 — breaking any
+      # healthcheck run from inside the same container. Force 0.0.0.0.
+      HOSTNAME: "0.0.0.0"
     ports:
       - "3000:3000"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/api/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   studio:
-    image: node:26-alpine
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
     restart: unless-stopped
     working_dir: /app
     depends_on:
       db:
         condition: service_healthy
-    volumes:
-      - ./prisma:/app/prisma:ro
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-sgos}:${POSTGRES_PASSWORD:-sgos_dev_password}@db:5432/${POSTGRES_DB:-sgos_assessment}?schema=public
-    # Prisma 7.10.0's `studio` dropped --hostname and only binds to
-    # 127.0.0.1 inside a container (unreachable via port publish), and a
-    # socat TCP proxy in front of it corrupts the /bff POST responses
-    # Studio relies on. 6.12.0 (matches this project's own prisma version)
-    # supports --hostname 0.0.0.0 directly, no proxy needed.
-    command: sh -c "npx --yes prisma@6.12.0 studio --port 5555 --hostname 0.0.0.0 --schema prisma/schema.prisma"
+    # `builder` stage already has node_modules (with prisma CLI) and
+    # prisma/schema.prisma baked into the image, no bind mount needed
+    # (bind mount path is relative to compose file location, breaks on
+    # some hosts like Coolify where checkout path differs).
+    command: sh -c "npx prisma studio --port 5555 --hostname 0.0.0.0 --schema prisma/schema.prisma"
     ports:
       - "5555:5555"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:5555 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
 
 volumes:
   pgdata:
