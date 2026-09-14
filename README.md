@@ -186,6 +186,21 @@ npm run lint
 npm run db:seed              # seed prompt v1 thủ công (cũng tự seed ở request đầu)
 ```
 
+### Prisma Studio
+
+`docker-compose.yml` có sẵn service `studio`, expose Prisma Studio ở
+`http://localhost:5555` để xem/sửa data trực tiếp.
+
+```bash
+docker compose up -d studio   # cần db chạy trước (up -d db, hoặc docker:up)
+# -> http://localhost:5555
+```
+
+### Doc pages trong app
+
+`/readme` và `/assessment-02` render `README.md` và `ASSESSMENT_02.md`
+ngay trong app (link ở cuối sidebar), dùng `react-markdown`.
+
 ## 12. Environment variables
 
 | Variable                                              | Bắt buộc    | Mô tả                                           |

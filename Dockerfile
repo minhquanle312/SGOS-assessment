@@ -22,6 +22,8 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/README.md ./README.md
+COPY --from=builder /app/ASSESSMENT_02.md ./ASSESSMENT_02.md
 
 EXPOSE 3000
 CMD ["node", "server.js"]

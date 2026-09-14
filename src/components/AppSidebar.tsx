@@ -1,10 +1,13 @@
 "use client";
 
 import { useEffect, useImperativeHandle, useState, forwardRef } from "react";
-import { PlusIcon, GraduationCapIcon } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { PlusIcon, GraduationCapIcon, BookOpenIcon, FileTextIcon } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -31,6 +34,7 @@ const AppSidebar = forwardRef<
   const [items, setItems] = useState<EvaluationListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingId, setLoadingId] = useState<string | null>(null);
+  const pathname = usePathname();
 
   async function fetchList() {
     setLoading(true);
@@ -101,6 +105,34 @@ const AppSidebar = forwardRef<
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              isActive={pathname === "/readme"}
+              tooltip="README"
+              render={
+                <Link href="/readme">
+                  <BookOpenIcon />
+                  <span className="group-data-[collapsible=icon]:hidden">README</span>
+                </Link>
+              }
+            />
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              isActive={pathname === "/assessment-02"}
+              tooltip="Assessment 02"
+              render={
+                <Link href="/assessment-02">
+                  <FileTextIcon />
+                  <span className="group-data-[collapsible=icon]:hidden">Assessment 02</span>
+                </Link>
+              }
+            />
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
     </Sidebar>
   );
 });
